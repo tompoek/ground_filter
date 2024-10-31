@@ -45,7 +45,7 @@ In terminal 2:
 
 In terminal 3:
 
-> curl -o lidar_bagfile.bag https://drive.google.com/uc?id=12DoGBU6A0A8leMyhqwXASGQqoOyRcbTR
+Download the ROS2 bag file from this link and rename it e.g. to "lidar_bagfile.db3": https://drive.google.com/uc?id=12DoGBU6A0A8leMyhqwXASGQqoOyRcbTR
 
 > ros2 bag play lidar_bagfile.bag
 
