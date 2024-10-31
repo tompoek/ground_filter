@@ -1,59 +1,53 @@
-# Simple ground filtering demonstration in ROS and RVIZ
+# Simple ground filtering demonstration in ROS2 and RViz2
 
-In this demo using RVIZ, a vehicle is approaching an obstacle. We preprocess the LiDAR point clouds by distinguishing non-ground obstacles (shown in pink) from ground (shown in orange).
+In this demo using RViz2, a vehicle is approaching an obstacle. I preprocess the LiDAR point clouds by distinguishing non-ground obstacles (shown in pink) from ground (shown in orange).
 
-Check the youtube videos for rviz recordings:
+Check the youtube videos for rviz recordings: (videos below were ROS1 Melodic implementation)
 
 * https://www.youtube.com/watch?v=1cPNjVveXvY
 * https://www.youtube.com/watch?v=AfEXqDKbUt0
 
-
 ### Environment
 
-Linux Ubuntu 18.04 ROS Melodic, you are free to use other Ubuntu and ROS distributions, however they are not yet tested here.
+Linux Ubuntu 22.04 ROS2 Humble, you are free to use other Ubuntu and ROS2 distributions, be sure to source the correct setups.
 
-For all terminals you open later, assuming you have sourced ros melodic by default, otherwise:
+For all terminals you open later, assuming you have sourced ros2 by default, otherwise:
 
-> echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+> echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
 ### Build
 
-> mkdir -p ~/catkin_ws/src
+> mkdir -p ~/ros2_ws/src
 
-> cd ~/
+> cd ~/ros2_ws/src/
 
 > git clone https://github.com/tompoek/ground_filter
 
-> cp -r ~/ground_filter ~/catkin_ws/src/
+> cd ~/ros2_ws/
 
-> cd ~/catkin_ws/
-
-> catkin_make
+> colcon build --packages-select ground_filter_pkg
 
 ### Run
 
-open terminal 1:
+In terminal 1:
 
-> roscore
+> rviz2
 
-open terminal 2:
+Once rviz2 UI is opened, import the provided rviz2 config: rviz.rviz
 
-> rosrun rviz rviz
+In terminal 2:
 
-in rviz UI, import the provided rviz config: rviz.rviz
+> . install/setup.bash
 
-open terminal 3:
+> ros2 run ground_filter_pkg ground_filter
 
-> source ~/catkin_ws/devel/setup.bash
+In terminal 3:
 
-> rosrun ground_filter_pkg ground_filter
+> curl -o lidar_bagfile.bag https://drive.google.com/uc?id=12DoGBU6A0A8leMyhqwXASGQqoOyRcbTR
 
-open terminal 4:
-> curl -o lidar_bagfile.bag https://drive.google.com/uc?id=1I2Eg-6Dl1GyrdVGBubHunHwM2Rh9ea3n
+> ros2 bag play lidar_bagfile.bag
 
-> rosbag play lidar_bagfile.bag
-
-Switch to rviz UI and see the play (/ground and /nonground in different colours). You should be able to reproduce everything as in the recordings. ENJOY!
+Switch to rviz2 UI and see the replay (/ground and /nonground in different colours). You should be able to reproduce everything as in the recordings. ENJOY!
 
 
 ### List of Assumptions:
@@ -61,4 +55,8 @@ Switch to rviz UI and see the play (/ground and /nonground in different colours)
 - Any debris (not large rocks) is considered part of ground.
 - No big objects on both sides (lidar points are noisy at |Y| > 1m).
 
-I have been able to fast implement ground filter algorithms by only using the Z coordinates info and comparing to a threshold.
+### Ongoing works:
+
+- DONE: Use height (Z) thresholding to filter out ground.
+- TODO: Make the z threshold tunable.
+- TODO: Apply more advanced techniques / Use third party libs.
