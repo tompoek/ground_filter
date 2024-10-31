@@ -47,7 +47,7 @@ In terminal 3:
 
 Download the ROS2 bag file from this link and rename it e.g. to "lidar_bagfile.db3": https://drive.google.com/uc?id=12DoGBU6A0A8leMyhqwXASGQqoOyRcbTR
 
-> ros2 bag play lidar_bagfile.bag
+> ros2 bag play lidar_bagfile.db3
 
 Switch to rviz2 UI and see the replay (/ground and /nonground in different colours). You should be able to reproduce everything as in the recordings. ENJOY!
 
