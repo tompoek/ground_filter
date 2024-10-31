@@ -2,6 +2,8 @@
 
 In this demo using RViz2, a vehicle is approaching an obstacle. I preprocess the LiDAR point clouds by distinguishing non-ground obstacles (shown in pink) from ground (shown in orange).
 
+![image](https://github.com/user-attachments/assets/56063519-433f-498a-a950-3ef27c93baf6)
+
 Check the youtube videos for rviz recordings: (videos below were ROS1 Melodic implementation)
 
 * https://www.youtube.com/watch?v=1cPNjVveXvY
