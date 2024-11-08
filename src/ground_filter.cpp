@@ -22,14 +22,14 @@
 using std::placeholders::_1;
 using namespace std::chrono_literals;
 
-class GroundFilter : public rclcpp::Node
+class GroundFilterNode : public rclcpp::Node
 {
 public:
-  GroundFilter()
-  : Node("minimal_subscriber")
+  GroundFilterNode()
+  : Node("ground_filter_node")
   {
     subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "/livox/lidar", 10, std::bind(&GroundFilter::topic_callback, this, _1));
+      "/livox/lidar", 10, std::bind(&GroundFilterNode::topic_callback, this, _1));
     pub_nonground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/nonground", 10);
     pub_ground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/ground", 10);
   }
@@ -37,19 +37,6 @@ public:
 private:
   sensor_msgs::msg::PointCloud2 nonground;
   sensor_msgs::msg::PointCloud2 ground;
-
-  sensor_msgs::msg::PointCloud2 initPoints(sensor_msgs::msg::PointCloud2 points_in)
-  { // initialize new point clouds by reusing input point clouds except timestamp and data values
-    sensor_msgs::msg::PointCloud2 points_out;
-    points_out.header.frame_id = points_in.header.frame_id;
-    points_out.height = points_in.height;
-    points_out.width = 0;
-    points_out.point_step = points_in.point_step; // 18
-    points_out.row_step = 0;
-    points_out.fields = points_in.fields;
-    points_out.is_dense = true;
-    return points_out;
-  }
   
   void filterGround(sensor_msgs::msg::PointCloud2 points_in)
   {
@@ -107,7 +94,7 @@ private:
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<GroundFilter>());
+  rclcpp::spin(std::make_shared<GroundFilterNode>());
   rclcpp::shutdown();
   return 0;
 }
