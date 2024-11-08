@@ -10,7 +10,7 @@ public:
   GroundFilterNode()
   : Node("ground_filter_node")
   {
-    this->declare_parameter("height_threshold", 0.3);
+    this->declare_parameter("height_threshold", 0.2);
     this->get_parameter("height_threshold", heightThreshold_);
 
     subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
