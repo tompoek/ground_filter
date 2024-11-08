@@ -10,6 +10,9 @@ public:
   GroundFilterNode()
   : Node("ground_filter_node")
   {
+    this->declare_parameter("height_threshold", 0.3);
+    this->get_parameter("height_threshold", heightThreshold_);
+
     subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
       "/livox/lidar", 10, std::bind(&GroundFilterNode::topic_callback, this, _1));
     pub_nonground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/nonground", 10);
@@ -17,6 +20,8 @@ public:
   }
 
 private:
+  double heightThreshold_;
+
   sensor_msgs::msg::PointCloud2 nonground;
   sensor_msgs::msg::PointCloud2 ground;
   
@@ -46,7 +51,7 @@ private:
       point_data.push_back(tag);
       point_data.push_back(line);
       // Assign to nonground or ground based on z value
-      if (z > 0.3 /*TODO: make the threshold (in metre) tunable*/) {
+      if (z > heightThreshold_) {
         nonground.data.insert(nonground.data.end(), point_data.begin(), point_data.end());
       } else {
         ground.data.insert(ground.data.end(), point_data.begin(), point_data.end());
