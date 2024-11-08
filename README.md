@@ -61,14 +61,11 @@ Or, download the ROS2 bag file advanced.db3 from this link: https://drive.google
 
 Switch to rviz2 UI and see the replay (/ground and /nonground in different colours). You should be able to reproduce everything as in the recordings. ENJOY!
 
-
-### List of Assumptions:
-
-- Any debris (not large rocks) is considered part of ground.
-- No big objects on both sides (lidar points are noisy at |Y| > 1m).
-
-### Ongoing works:
+### What's done and what's to-do:
 
 - DONE: Use height (Z) thresholding to filter out ground.
-- TODO: Make the z threshold tunable.
-- TODO: Apply more advanced techniques / Use third party libs.
+- DONE: Make the height (z) threshold tunable.
+- DONE: Apply RANSAC to filter ground by calling PCL library.
+- DONE: Make the distance threshold in RANSAC tunable.
+- TODO: Expand other perception tasks e.g. object detection using YOLO3D
+- TODO: Expand other perception tasks e.g. mapping and localization using SLAM
