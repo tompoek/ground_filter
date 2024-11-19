@@ -1,5 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <livox_ros_driver2/msg/custom_msg.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/extract_indices.h>
@@ -19,20 +19,27 @@ public:
     this->declare_parameter("distance_threshold", 0.1);
     this->get_parameter("distance_threshold", distanceThreshold_);
 
-    subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "/livox/lidar", 10, std::bind(&GroundFilterNode::filterGround, this, _1));
-    pub_nonground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/nonground", 10);
-    pub_ground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/ground", 10);
+    subscription_ = this->create_subscription<livox_ros_driver2::msg::CustomMsg>(
+      "/livox/lidar_custom", 10, std::bind(&GroundFilterNode::filterGround, this, _1));
+    pub_nonground_ = this->create_publisher<livox_ros_driver2::msg::CustomMsg>("/livox/lidar" /* /nonground is published as /livox/lidar subscribed by fast_lio */, 10);
+    pub_ground_ = this->create_publisher<livox_ros_driver2::msg::CustomMsg>("/ground", 10);
   }
 
 private:
   double distanceThreshold_;
 
-  void filterGround(sensor_msgs::msg::PointCloud2::SharedPtr livox_lidar_msg)
+  void filterGround(const livox_ros_driver2::msg::CustomMsg::SharedPtr livox_lidar_msg)
   {
-    // Convert ROS2 PointCloud2 to PCL PointCloud
+    // Convert Livox_ROS_Driver2 CustomMsg to PCL PointCloud
     pcl::PointCloud<pcl::PointXYZI>::Ptr livox_lidar_cloud(new pcl::PointCloud<pcl::PointXYZI>());
-    pcl::fromROSMsg(*livox_lidar_msg, *livox_lidar_cloud);
+    for (const auto & point : livox_lidar_msg->points) {
+      pcl::PointXYZI pcl_point;
+      pcl_point.x = point.x;
+      pcl_point.y = point.y;
+      pcl_point.z = point.z;
+      pcl_point.intensity = point.reflectivity;
+      livox_lidar_cloud->push_back(pcl_point);
+    }
 
     // RANSAC plane segmentation
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients);
@@ -61,12 +68,28 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr nonground_cloud(new pcl::PointCloud<pcl::PointXYZI>());
     extract.filter(*nonground_cloud);
 
-    // Convert filtered PCL clouds back to ROS2 PointCloud2
-    sensor_msgs::msg::PointCloud2 ground_msg;
-    pcl::toROSMsg(*ground_cloud, ground_msg);
+    // Convert filtered PCL clouds back to Livox_ROS_Driver2 CustomMsg
+    livox_ros_driver2::msg::CustomMsg ground_msg;
+    ground_msg.point_num = ground_cloud->size();
+    for (const auto & pcl_point : *ground_cloud) {
+      livox_ros_driver2::msg::CustomPoint point;
+      point.x = pcl_point.x;
+      point.y = pcl_point.y;
+      point.z = pcl_point.z;
+      point.reflectivity = pcl_point.intensity;
+      ground_msg.points.push_back(point);
+    }
     ground_msg.header = livox_lidar_msg->header;
-    sensor_msgs::msg::PointCloud2 nonground_msg;
-    pcl::toROSMsg(*nonground_cloud, nonground_msg);
+    livox_ros_driver2::msg::CustomMsg nonground_msg;
+    nonground_msg.point_num = nonground_cloud->size();
+    for (const auto & pcl_point : *nonground_cloud) {
+      livox_ros_driver2::msg::CustomPoint point;
+      point.x = pcl_point.x;
+      point.y = pcl_point.y;
+      point.z = pcl_point.z;
+      point.reflectivity = pcl_point.intensity;
+      nonground_msg.points.push_back(point);
+    }
     nonground_msg.header = livox_lidar_msg->header;
 
     // Publish ground and nonground messages
@@ -74,9 +97,9 @@ private:
     pub_nonground_->publish(nonground_msg);
   }
 
-  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_nonground_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_ground_;
+  rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr subscription_;
+  rclcpp::Publisher<livox_ros_driver2::msg::CustomMsg>::SharedPtr pub_nonground_;
+  rclcpp::Publisher<livox_ros_driver2::msg::CustomMsg>::SharedPtr pub_ground_;
 };
 
 int main(int argc, char * argv[])

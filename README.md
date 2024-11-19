@@ -1,8 +1,10 @@
 # Simple ground filtering demonstration in ROS2 and RViz2
 
-In this demo using RViz2, a vehicle is approaching an obstacle. I preprocess the LiDAR point clouds by distinguishing non-ground obstacles (shown in pink) from ground (shown in orange).
+In a demo combined with [FAST-LIO2](https://github.com/tompoek/FAST_LIO), a vehicle is approaching an obstacle. 
 
-![image](https://github.com/user-attachments/assets/56063519-433f-498a-a950-3ef27c93baf6)
+I preprocess the LiDAR point clouds by distinguishing non-ground obstacles (shown in pink) from ground (shown in orange). 
+
+Then, FAST-LIO2 will update LiDAR-inertia-based odometry.
 
 Check the youtube videos for rviz recordings:
 
@@ -11,55 +13,63 @@ Check the youtube videos for rviz recordings:
 
 ### Environment
 
-Linux Ubuntu 22.04 ROS2 Humble, you are free to use other Ubuntu and ROS2 distributions, be sure to source the correct setups.
+Linux Ubuntu 24.04 ROS2 Jazzy, you are free to use other Ubuntu and ROS2 distributions, be sure to source the correct setups.
 
 For all terminals you open later, assuming you have sourced ros2 by default, otherwise:
 
-> echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+> echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+
+### Dependencies
+
+[Livox ROS Driver2](https://github.com/Livox-SDK/livox_ros_driver2)
 
 ### Build
 
-> mkdir -p ~/ros2_ws/src
+> mkdir -p ~/ws_livox/src
 
-> cd ~/ros2_ws/src/
+> cd ~/ws_livox/src/
+
+> git clone https://github.com/Livox-SDK/livox_ros_driver2
 
 > git clone https://github.com/tompoek/ground_filter
 
-> cd ~/ros2_ws/
+> git clone https://github.com/tompoek/FAST_LIO
 
-> colcon build --packages-select ground_filter_pkg
+> cd ~/ws_livox/src/FAST_LIO
+
+> git submodule init
+
+> git submodule update --remote --recursive
+
+> cd ~/ws_livox/
+
+> colcon build --symlink-install --packages-select livox_ros_driver2 ground_filter_pkg fast_lio
 
 ### Run
 
-In terminal 1:
-
-> rviz2
-
-Once rviz2 UI is opened, import the provided rviz2 config: rviz.rviz
-
-In terminal 2:
+In one terminal:
 
 > . install/setup.bash
 
 Try the RANSAC implementation:
 
-> ros2 run ground_filter_pkg ground_filter_ransac
+> ros2 run ground_filter_pkg ground_filter_ransac --ros-args -p distance_threshold:=0.1
 
-Or, try the Z thresholding implementation:
+In another terminal:
 
-> ros2 run ground_filter_pkg ground_filter
+Run FAST-LIO2 with its Rviz2 visualization config.
 
-In terminal 3:
+> . install/setup.bash
 
-Download the ROS2 bag file simple.db3 from this link: https://drive.google.com/uc?id=1K7KTnqZr5pdYHFOYX8IQBcJLRl242YRp
+> ros2 launch fast_lio mapping.launch.py config_file:=avia.yaml
 
-> ros2 bag play simple.db3
+In another terminal:
 
-Or, download the ROS2 bag file advanced.db3 from this link: https://drive.google.com/uc?id=12DoGBU6A0A8leMyhqwXASGQqoOyRcbTR
+Download the ROS2 bag file simple_lidar_custom from this link: https://drive.google.com/drive/folders/1OR1Ateea6Wpw9oPVopagO8DaP0R6-AN4?usp=sharing
 
-> ros2 bag play advanced.db3
+> . install/setup.bash
 
-Switch to rviz2 UI and see the replay (/ground and /nonground in different colours). You should be able to reproduce everything as in the recordings. ENJOY!
+> ros2 bag play simple_lidar_custom/
 
 ### What's done and what's to-do:
 

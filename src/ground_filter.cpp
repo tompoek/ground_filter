@@ -1,5 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <livox_ros_driver2/msg/custom_msg.hpp>
 
 using std::placeholders::_1;
 
@@ -12,69 +12,51 @@ public:
     this->declare_parameter("height_threshold", 0.2);
     this->get_parameter("height_threshold", heightThreshold_);
 
-    subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "/livox/lidar", 10, std::bind(&GroundFilterNode::topic_callback, this, _1));
-    pub_nonground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/nonground", 10);
-    pub_ground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/ground", 10);
+    subscription_ = this->create_subscription<livox_ros_driver2::msg::CustomMsg>(
+      "/livox/lidar_custom", 10, std::bind(&GroundFilterNode::topic_callback, this, _1));
+    pub_nonground_ = this->create_publisher<livox_ros_driver2::msg::CustomMsg>("/livox/lidar" /* /nonground is published as /livox/lidar subscribed by fast_lio */, 10);
+    pub_ground_ = this->create_publisher<livox_ros_driver2::msg::CustomMsg>("/ground", 10);
   }
 
 private:
   double heightThreshold_;
 
-  sensor_msgs::msg::PointCloud2 nonground;
-  sensor_msgs::msg::PointCloud2 ground;
+  livox_ros_driver2::msg::CustomMsg nonground;
+  livox_ros_driver2::msg::CustomMsg ground;
   
-  void filterGround(sensor_msgs::msg::PointCloud2 points_in)
+  void filterGround(const livox_ros_driver2::msg::CustomMsg & points_in)
   {
     nonground = points_in;
     ground = points_in;
-    nonground.data.clear();
-    ground.data.clear();
-    for (unsigned int i=0; i<points_in.width; ++i) {
-      uint8_t* point_ptr = &points_in.data[i * points_in.point_step];
-      // Extract point data
-      float x, y, z, intensity;
-      uint8_t tag, line;
-      std::memcpy(&x, point_ptr + 0, sizeof(float));
-      std::memcpy(&y, point_ptr + 4, sizeof(float));
-      std::memcpy(&z, point_ptr + 8, sizeof(float));
-      std::memcpy(&intensity, point_ptr + 12, sizeof(float));
-      tag = *(point_ptr + 16);
-      line = *(point_ptr + 17);
-      // Serialize point data
-      std::vector<uint8_t> point_data;
-      point_data.insert(point_data.end(), reinterpret_cast<uint8_t*>(&x), reinterpret_cast<uint8_t*>(&x) + sizeof(x));
-      point_data.insert(point_data.end(), reinterpret_cast<uint8_t*>(&y), reinterpret_cast<uint8_t*>(&y) + sizeof(y));
-      point_data.insert(point_data.end(), reinterpret_cast<uint8_t*>(&z), reinterpret_cast<uint8_t*>(&z) + sizeof(z));
-      point_data.insert(point_data.end(), reinterpret_cast<uint8_t*>(&intensity), reinterpret_cast<uint8_t*>(&intensity) + sizeof(intensity));
-      point_data.push_back(tag);
-      point_data.push_back(line);
+    nonground.point_num = 0;
+    ground.point_num = 0;
+    nonground.points.clear();
+    ground.points.clear();
+    for (const auto & point : points_in.points) {
       // Assign to nonground or ground based on z value
-      if (z > heightThreshold_) {
-        nonground.data.insert(nonground.data.end(), point_data.begin(), point_data.end());
+      if (point.z > heightThreshold_) {
+        nonground.points.push_back(point);
       } else {
-        ground.data.insert(ground.data.end(), point_data.begin(), point_data.end());
-      };
+        ground.points.push_back(point);
+      }
     }
     // Update the number of points in nonground and ground
-    nonground.width = nonground.data.size() / nonground.point_step;
-    nonground.row_step = nonground.point_step * nonground.width;
-    ground.width = ground.data.size() / ground.point_step;
-    ground.row_step = ground.point_step * ground.width;
-    ground.header.stamp = this->now();
-    nonground.header.stamp = this->now();
+    nonground.point_num = nonground.points.size();
+    ground.point_num = ground.points.size();
+    ground.header.stamp = points_in.header.stamp /* fast_lio requires LiDAR to be synced with IMU -> reuse the original timestamp */;
+    nonground.header.stamp = points_in.header.stamp;
   }
   
-  void topic_callback(const sensor_msgs::msg::PointCloud2 & livox_lidar)
+  void topic_callback(const livox_ros_driver2::msg::CustomMsg & livox_lidar)
   {
     filterGround(livox_lidar);
     pub_nonground_->publish(nonground);
     pub_ground_->publish(ground);
   }
 
-  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscription_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_nonground_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_ground_;
+  rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr subscription_;
+  rclcpp::Publisher<livox_ros_driver2::msg::CustomMsg>::SharedPtr pub_nonground_;
+  rclcpp::Publisher<livox_ros_driver2::msg::CustomMsg>::SharedPtr pub_ground_;
 };
 
 int main(int argc, char * argv[])
