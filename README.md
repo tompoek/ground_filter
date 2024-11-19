@@ -6,10 +6,9 @@ I preprocess the LiDAR point clouds by distinguishing non-ground obstacles (show
 
 Then, FAST-LIO2 will update LiDAR-inertia-based odometry.
 
-Check the youtube videos for rviz recordings:
+Snapshot using RANSAC algorithm to filter ground, and FAST-LIO2 to update odometry:
 
-* Using height (Z) thresholding: https://youtu.be/_BsraDXbNPA
-* Using RANSAC (Random Sampling Consensus) algorithm: https://youtu.be/YCeWqTxxGiU
+![image](https://github.com/user-attachments/assets/ca43448a-fecf-4a10-92be-666b07d15299)
 
 ### Environment
 
