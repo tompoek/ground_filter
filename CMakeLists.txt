@@ -18,7 +18,7 @@ include_directories(${PCL_INCLUDE_DIRS})
 
 # add executables
 add_executable(ground_filter src/ground_filter.cpp)
-ament_target_dependencies(ground_filter rclcpp sensor_msgs pcl_conversions pcl_ros)
+ament_target_dependencies(ground_filter rclcpp sensor_msgs)
 add_executable(ground_filter_ransac src/ground_filter_ransac.cpp)
 ament_target_dependencies(ground_filter_ransac rclcpp sensor_msgs pcl_conversions pcl_ros)
 
