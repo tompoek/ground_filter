@@ -17,7 +17,13 @@ For all terminals you open later, assuming you have sourced ros2 by default, oth
 
 > echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
+### Dependencies
+
+* [ROS PCL / Point Cloud Library](http://wiki.ros.org/pcl_ros)
+
 ### Build
+
+> sudo apt update -y && sudo apt install ros-<distro>-pcl-ros -y
 
 > mkdir -p ~/ros2_ws/src
 
