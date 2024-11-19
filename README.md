@@ -23,7 +23,7 @@ For all terminals you open later, assuming you have sourced ros2 by default, oth
 
 ### Build
 
-> sudo apt update -y && sudo apt install ros-<distro>-pcl-ros -y
+> sudo apt update -y && sudo apt install ros-\<distro\>-pcl-ros -y
 
 > mkdir -p ~/ros2_ws/src
 
