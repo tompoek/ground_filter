@@ -1,6 +1,8 @@
-# Simple ground filtering demonstration in ROS2 and RViz2
+# Ground filtering demonstration in ROS2 and RViz2
 
-In this demo using RViz2, a vehicle is approaching an obstacle. I preprocess the LiDAR point clouds by distinguishing non-ground obstacles (shown in pink) from ground (shown in orange).
+In this demo, a mining vehicle equipped with LiDAR sensor is operating in a mining scene. 
+
+I filter the LiDAR point clouds by distinguishing non-ground points (shown in pink) from ground points (shown in orange). 
 
 ![image](https://github.com/user-attachments/assets/56063519-433f-498a-a950-3ef27c93baf6)
 
