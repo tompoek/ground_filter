@@ -1,10 +1,10 @@
-# Simple ground filtering demonstration in ROS2 and RViz2
+# Ground filtering + LiDAR Inertia based Odometry demonstration in ROS2 
 
-In a demo combined with [FAST-LIO2](https://github.com/tompoek/FAST_LIO), a vehicle is approaching an obstacle. 
+In this demo, a mining vehicle equipped with LiDAR sensor is operating in a mining scene. 
 
-I preprocess the LiDAR point clouds by distinguishing non-ground obstacles (shown in pink) from ground (shown in orange). 
+I filter the LiDAR point clouds by distinguishing non-ground points from ground points. 
 
-Then, FAST-LIO2 will update LiDAR-inertia-based odometry.
+Then, [FAST-LIO2](https://github.com/tompoek/FAST_LIO) will update LiDAR-Inertia-based odometry.
 
 Snapshot using RANSAC algorithm to filter ground, and FAST-LIO2 to update odometry:
 
@@ -20,9 +20,12 @@ For all terminals you open later, assuming you have sourced ros2 by default, oth
 
 ### Dependencies
 
-[Livox ROS Driver2](https://github.com/Livox-SDK/livox_ros_driver2)
+* [ROS PCL / Point Cloud Library](http://wiki.ros.org/pcl_ros)
+* [Livox ROS Driver2](https://github.com/Livox-SDK/livox_ros_driver2)
 
 ### Build
+
+> sudo apt update -y && sudo apt install ros-\<distro\>-pcl-ros -y
 
 > mkdir -p ~/ws_livox/src
 
