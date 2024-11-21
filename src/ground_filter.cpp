@@ -13,7 +13,7 @@ public:
     this->get_parameter("height_threshold", heightThreshold_);
 
     subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "/livox/lidar", 10, std::bind(&GroundFilterNode::topic_callback, this, _1));
+      "/livox/lidar_pointcloud2", 10, std::bind(&GroundFilterNode::topic_callback, this, _1));
     pub_nonground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/nonground", 10);
     pub_ground_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/ground", 10);
   }
