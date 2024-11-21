@@ -1,4 +1,6 @@
-# Ground filtering + LiDAR Inertia based Odometry demonstration in ROS2 
+# Ground filtering + LiDAR Inertia based Odometry in a Mining Scene
+
+Watch [video here](https://youtu.be/KCz5MW_5rRk?si=Q_fYpudGgoRbwFw-).
 
 [FAST-LIO2 aka Fast LiDAR Inertia based Odometry](https://github.com/hku-mars/FAST_LIO/tree/ROS2) has been well tested in Hong Kong urban area with smooth ground surface.
 
