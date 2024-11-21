@@ -1,79 +1,65 @@
-# Ground filtering demonstration in ROS2 and RViz2
+# Ground filtering + LiDAR Inertia based Odometry demonstration in ROS2 
 
-In this demo, a mining vehicle equipped with LiDAR sensor is operating in a mining scene. 
+[FAST-LIO2 aka Fast LiDAR Inertia based Odometry](https://github.com/tompoek/FAST_LIO) has been well tested in Hong Kong urban area with smooth ground surface.
 
-I filter the LiDAR point clouds by distinguishing non-ground points (shown in pink) from ground points (shown in orange). 
+However in this demo, the LiDAR sensor is installed on a mining vehicle which operates in a mining scene, where _**ground surface is rough and full of debris**_.
 
-![image](https://github.com/user-attachments/assets/56063519-433f-498a-a950-3ef27c93baf6)
+In this scenario, the odometry estimate of FAST-LIO2 is unlikely to converge.
+![image](https://github.com/user-attachments/assets/ad8300eb-bb41-49ed-aec0-2dc50abb6444)
 
-Check the youtube videos for rviz recordings:
+Only in some rare trials (after multiple running trials) would FAST-LIO2 manage to converge after initially noisy estimate.
+![image](https://github.com/user-attachments/assets/7ecfae6c-690b-4e24-9c94-c63346e04579)
 
-* Using height (Z) thresholding: https://youtu.be/_BsraDXbNPA
-* Using RANSAC (Random Sampling Consensus) algorithm: https://youtu.be/YCeWqTxxGiU
+I filter some of the LiDAR point clouds that correspond to the rough ground surface, and feed the non-ground point clouds into FAST-LIO2.
+
+This successfully helps guarantee FAST-LIO2 to converge its odometry.
+![image](https://github.com/user-attachments/assets/0bae42ce-f8a3-45c1-838f-aa664f2a8c8b)
 
 ### Environment
 
-Linux Ubuntu 22.04 ROS2 Humble, you are free to use other Ubuntu and ROS2 distributions, be sure to source the correct setups.
+Linux Ubuntu 24.04 ROS2 Jazzy, you are free to use other Ubuntu and ROS2 distributions, be sure to source the correct setups.
 
 For all terminals you open later, assuming you have sourced ros2 by default, otherwise:
 
-> echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+> echo "source /opt/ros/\<distro\>/setup.bash" >> ~/.bashrc
 
 ### Dependencies
 
 * [ROS PCL / Point Cloud Library](http://wiki.ros.org/pcl_ros)
+* [Livox ROS Driver2](https://github.com/Livox-SDK/livox_ros_driver2)
 
 ### Build
 
 > sudo apt update -y && sudo apt install ros-\<distro\>-pcl-ros -y
 
-> mkdir -p ~/ros2_ws/src
+> cd ~/
 
-> cd ~/ros2_ws/src/
+> git clone https://github.com/tompoek/ws_livox
+
+> cd ~/ws_livox/
+
+> mkdir src && cd src/
 
 > git clone https://github.com/tompoek/ground_filter
 
-> cd ~/ros2_ws/
+> git clone https://github.com/Livox-SDK/livox_ros_driver2
 
-> colcon build --packages-select ground_filter_pkg
+> git clone https://github.com/tompoek/livox_lidar_converter
+
+> git clone https://github.com/tompoek/FAST_LIO
+
+> cd ~/ws_livox/
+
+> chmod +x *.sh
+
+> ./livox_build.sh
+
+### Download logged data
+
+Download this whole folder under ~/ws_livox: https://drive.google.com/drive/folders/15mHAeUO3cy36uBCQtKdujL-i5Evk9zhP?usp=sharing
 
 ### Run
 
-In terminal 1:
+> ./livox_launch_fast_lio_with_ground_filter.sh
 
-> rviz2
-
-Once rviz2 UI is opened, import the provided rviz2 config: rviz.rviz
-
-In terminal 2:
-
-> . install/setup.bash
-
-Try the RANSAC implementation:
-
-> ros2 run ground_filter_pkg ground_filter_ransac
-
-Or, try the Z thresholding implementation:
-
-> ros2 run ground_filter_pkg ground_filter
-
-In terminal 3:
-
-Download the ROS2 bag file simple.db3 from this link: https://drive.google.com/uc?id=1K7KTnqZr5pdYHFOYX8IQBcJLRl242YRp
-
-> ros2 bag play simple.db3
-
-Or, download the ROS2 bag file advanced.db3 from this link: https://drive.google.com/uc?id=12DoGBU6A0A8leMyhqwXASGQqoOyRcbTR
-
-> ros2 bag play advanced.db3
-
-Switch to rviz2 UI and see the replay (/ground and /nonground in different colours). You should be able to reproduce everything as in the recordings. ENJOY!
-
-### What's done and what's to-do:
-
-- DONE: Use height (Z) thresholding to filter out ground.
-- DONE: Make the height (z) threshold tunable.
-- DONE: Apply RANSAC to filter ground by calling PCL library.
-- DONE: Make the distance threshold in RANSAC tunable.
-- TODO: Expand other perception tasks e.g. object detection using YOLO3D
-- TODO: Expand other perception tasks e.g. mapping and localization using SLAM
+Wait and see the replay in Rviz2. ENJOY!
